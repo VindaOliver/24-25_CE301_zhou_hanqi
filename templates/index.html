@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat Breed • Identify</title>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=PingFang+SC:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+    <script src="{{ url_for('static', filename='js/userDropdown.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/fileUpload.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/predictionBars.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/flashMessages.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <style>
+        /* 仅保留每日推荐猫咪品种样式和其他页面特有样式 */
+        .daily-breed-container {
+            margin-bottom: 40px;
+            margin-top: 30px;
+        }
+        
+        .daily-breed-container .card {
+            border-radius: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: none;
+        }
+        
+        .daily-breed-image {
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .daily-breed-image:hover {
+            transform: scale(1.02);
+        }
+        
+        .daily-breed-info h4 {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .fun-fact-box {
+            background-color: rgba(51, 136, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            border-left: 4px solid var(--primary-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .fun-fact-box:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(51, 136, 255, 0.1);
+        }
+        
+        .fun-fact-box h4 {
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+        
+        .fun-fact-box .lead {
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #333;
+        }
+        
+        .daily-breed-container .card-title {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        /* 添加新的样式 */
+        .breed-section {
+            margin-bottom: 20px;
+        }
+        
+        .breed-section h4 {
+            margin-bottom: 8px;
+            color: var(--text-color);
+            font-weight: 600;
+        }
+        
+        .breed-details-list {
+            list-style-type: none;
+            padding-left: 0;
+            margin: 0;
+        }
+        
+        .breed-details-list li {
+            padding: 6px 0;
+            border-bottom: 1px solid #e6e6e6;
+        }
+        
+        .breed-details-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .breed-details-list li strong {
+            color: #555;
+            margin-right: 5px;
+        }
+        
+        /* 为性格特点添加标签样式 */
+        .personality-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .personality-tag {
+            background-color: #e8f0fe;
+            color: #1a73e8;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            display: inline-block;
+        }
+
+        .prediction-item .prediction-bar {
+            width: 0;
+            transition: width 0.6s ease;
+        }
+    </style>
+</head>
+<body>
+    {% include 'navbar.html' %}
+    
+    <div class="main-container">
+        <div class="text-center">
+            <h1 class="page-title">Cat Breed Recognition</h1>
+            <p class="page-subtitle">Upload a photo of your cat and let us help you identify its breed</p>
+        </div>
+
+        <div class="upload-container">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <p class="upload-text">Click or drag to upload an image</p>
+                <button class="upload-button" type="button">Select Image</button>
+                <input type="file" id="fileInput" style="display: none;" accept="image/*">
+            </div>
+            
+            <div class="preview-container">
+                <img id="imagePreview" alt="Preview">
+                <button class="retry-button" id="retryButton">Re-identify</button>
+            </div>
+
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p>Analyzing the picture...</p>
+            </div>
+
+            <div class="results-container">
+                <div id="predictions"></div>
+                <div id="breedInfo" class="breed-info"></div>
+            </div>
+        </div>
+
+        <!-- Daily Breed Recommendation -->
+        <div class="daily-breed-container">
+            <div class="card">
+                <div class="card-body p-4">
+                    <h2 class="card-title text-center mb-3">Daily Breed Recommendation</h2>
+                    <div class="row align-items-center g-3">
+                        <div class="col-md-5 text-center">
+                            <img src="{{ recommended_breed.image_url }}" 
+                                 alt="{{ recommended_breed.breed }}" 
+                                 class="img-fluid rounded daily-breed-image mb-2"
+                                 onerror="this.src='https://placehold.co/400x300/f5f5f7/1d1d1f?text={{ recommended_breed.breed }}'">
+                            <h3 class="mt-2 mb-0 fs-5">{{ recommended_breed.breed }}</h3>
+                            <p class="text-muted small mb-0">Origin: {{ recommended_breed.characteristics.origin }}</p>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="daily-breed-info">
+                                <div class="fun-fact-box">
+                                    <h4>Breed Characteristics</h4>
+                                    <p class="mb-0">
+                                        {% if recommended_breed.fun_fact %}
+                                            {{ recommended_breed.fun_fact }}
+                                        {% else %}
+                                            {% if recommended_breed.personality and recommended_breed.personality|length > 0 %}
+                                                {{ recommended_breed.breed }} is a cat breed known for being 
+                                                {% for trait in recommended_breed.personality[:3] %}
+                                                    {{ trait }}{% if not loop.last %}, {% endif %}
+                                                {% endfor %}.
+                                            {% else %}
+                                                {{ recommended_breed.breed }} is a cat breed with unique characteristics.
+                                            {% endif %}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    {% include 'footer.html' %}
+</body>
+</html> 

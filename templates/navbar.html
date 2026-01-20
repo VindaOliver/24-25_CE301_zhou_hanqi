@@ -1,0 +1,119 @@
+<!-- Global Navigation Bar Component -->
+<nav class="navbar">
+    <div class="container d-flex justify-content-between align-items-center">
+        <a class="navbar-brand" href="{{ url_for('index') }}">Cat Breed</a>
+        <div class="nav-links">
+            {% if current_user %}
+                <a class="nav-link {% if request.path == url_for('history') %}active{% endif %}" href="{{ url_for('history') }}">History</a>
+                <a class="nav-link {% if request.path == url_for('statistics') %}active{% endif %}" href="{{ url_for('statistics') }}">Statistics</a>
+                <div class="dropdown">
+                    <img src="{{ url_for('static', filename='avatars/' + current_user['avatar_path']) }}" alt="Avatar" class="user-avatar" id="userAvatar">
+                    <div class="dropdown-content" id="userDropdown">
+                        <div class="dropdown-header">
+                            <img src="{{ url_for('static', filename='avatars/' + current_user['avatar_path']) }}" alt="Avatar" class="dropdown-avatar">
+                            <div class="dropdown-user-info">
+                                <div class="dropdown-username">{{ current_user['username'] }}</div>
+                                <div class="dropdown-email">{{ current_user['email'] }}</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Personal Information Form -->
+                        <div class="dropdown-section">
+                            <div class="dropdown-section-title">Personal Information</div>
+                            <form action="{{ url_for('update_profile') }}" method="post" enctype="multipart/form-data">
+                                <div class="avatar-upload">
+                                    <img src="{{ url_for('static', filename='avatars/' + current_user['avatar_path']) }}" alt="Avatar" class="avatar-preview" id="avatarPreview">
+                                    <label for="avatarInput" class="avatar-upload-btn">Change Avatar</label>
+                                    <input type="file" id="avatarInput" name="avatar" class="hidden" accept="image/*">
+                                </div>
+                                <input type="text" class="form-control" name="username" value="{{ current_user['username'] }}" placeholder="Username">
+                                <input type="email" class="form-control" name="email" value="{{ current_user['email'] }}" placeholder="Email">
+                                <input type="tel" class="form-control" name="phone" value="{{ current_user['phone'] or '' }}" placeholder="Phone">
+                                <textarea class="form-control" name="bio" placeholder="Bio">{{ current_user['bio'] or '' }}</textarea>
+                                <button type="submit" class="btn btn-primary w-100">Save Information</button>
+                            </form>
+                        </div>
+                        
+                        <!-- Change Password Form -->
+                        <div class="dropdown-section">
+                            <div class="dropdown-section-title">Change Password</div>
+                            <form action="{{ url_for('change_password') }}" method="post">
+                                <input type="password" class="form-control" name="current_password" placeholder="Current Password" required>
+                                <input type="password" class="form-control" name="new_password" placeholder="New Password" required>
+                                <input type="password" class="form-control" name="confirm_password" placeholder="Confirm New Password" required>
+                                <button type="submit" class="btn btn-primary w-100">Change Password</button>
+                            </form>
+                        </div>
+                        
+                        <a href="{{ url_for('logout') }}" class="btn btn-outline-secondary w-100 mt-3">Logout</a>
+                    </div>
+                </div>
+            {% else %}
+                <a class="nav-link {% if request.path == url_for('login') %}active{% endif %}" href="{{ url_for('login') }}">Login</a>
+                <a class="nav-link {% if request.path == url_for('register') %}active{% endif %}" href="{{ url_for('register') }}">Register</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<!-- 统一处理头像下拉框的脚本 -->
+<script>
+    (function() {
+        // 立即执行此函数，确保头像点击功能即刻生效
+        const setupDropdown = function() {
+            const userAvatar = document.getElementById('userAvatar');
+            const userDropdown = document.getElementById('userDropdown');
+            const avatarInput = document.getElementById('avatarInput');
+            const avatarPreview = document.getElementById('avatarPreview');
+            
+            if (userAvatar && userDropdown) {
+                // 移除已有的事件监听器（避免重复）
+                const newAvatar = userAvatar.cloneNode(true);
+                userAvatar.parentNode.replaceChild(newAvatar, userAvatar);
+                
+                // 添加新的点击事件
+                newAvatar.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('show');
+                });
+                
+                // 点击其他区域关闭下拉框
+                document.addEventListener('click', function(e) {
+                    if (userDropdown.classList.contains('show') && !userDropdown.contains(e.target)) {
+                        userDropdown.classList.remove('show');
+                    }
+                });
+                
+                // 阻止点击下拉框内部时关闭下拉框
+                userDropdown.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+                
+                // 头像预览功能
+                if (avatarInput && avatarPreview) {
+                    avatarInput.addEventListener('change', function() {
+                        if (this.files && this.files[0]) {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                avatarPreview.src = e.target.result;
+                            };
+                            reader.readAsDataURL(this.files[0]);
+                        }
+                    });
+                }
+            }
+        };
+        
+        // DOM加载完成时执行
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", setupDropdown);
+        } else {
+            // 如果DOM已经加载完毕，立即执行
+            setupDropdown();
+        }
+        
+        // 500ms后再次检查并执行，确保在所有页面上都正常工作
+        setTimeout(setupDropdown, 500);
+    })();
+</script> 

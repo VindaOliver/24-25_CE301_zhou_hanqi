@@ -1,0 +1,133 @@
+/* Unified Navigation Bar Styles */
+.navbar {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: saturate(180%) blur(20px);
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    padding: 10px 0;
+    height: var(--navbar-height, 60px);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+    font-weight: 600;
+    font-size: 1.05rem;
+    margin-right: 20px;
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 1001;
+}
+
+.nav-link {
+    color: var(--text-color);
+    opacity: 0.8;
+    transition: opacity 0.2s;
+    margin-left: 15px;
+    font-size: 0.9rem;
+    text-decoration: none;
+    padding: 3px 8px;
+}
+
+.nav-link:hover {
+    opacity: 1;
+    color: var(--text-color);
+}
+
+.nav-link.active {
+    opacity: 1;
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+/* User avatar styles */
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.2s;
+    visibility: visible;
+    opacity: 1;
+    z-index: 1001;
+}
+
+.user-avatar:hover {
+    border-color: var(--primary-color);
+}
+
+/* Dropdown menu styles */
+.dropdown {
+    position: relative;
+    display: inline-block;
+    z-index: 1001;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 100%;
+    background-color: white;
+    min-width: 300px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    z-index: 1001;
+    padding: 20px;
+    margin-top: 10px;
+}
+
+.dropdown-content.show {
+    display: block;
+}
+
+/* Dropdown elements */
+.dropdown-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.dropdown-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 15px;
+}
+
+.dropdown-user-info {
+    flex-grow: 1;
+}
+
+.dropdown-section {
+    margin-bottom: 15px;
+}
+
+/* Add .hidden class definition */
+.hidden {
+    display: none;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 0.95rem;
+    }
+    
+    .nav-link {
+        margin-left: 10px;
+        font-size: 0.85rem;
+    }
+} 
