@@ -33,8 +33,7 @@ ENV/
 
 # Project specific
 uploads/
-model/
-*.h5
+
 .env
 
 # Logs
