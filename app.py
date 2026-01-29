@@ -205,21 +205,9 @@ def index():
             'personality': []
         }
     
-    # 获取所有有图片的品种
-    breeds_with_images, breed_images = get_breeds_with_images()
-    
-    # 构建热门品种列表（提供了最完整的数据和图片的品种）
-    popular_breeds = []
-    for breed_name in breeds_with_images[:8]:  # 最多显示8个
-        popular_breeds.append({
-            'name': breed_name,
-            'image': breed_images[breed_name]['path']
-        })
-    
     return render_template('index.html', 
                           current_user=current_user, 
-                          recommended_breed=recommended_breed,
-                          popular_breeds=popular_breeds)
+                          recommended_breed=recommended_breed)
 
 # Route: Login
 @app.route('/login', methods=['GET', 'POST'])
@@ -1208,83 +1196,14 @@ def change_password():
     
     return redirect(url_for('index'))
 
-# 添加一个路由来提供dataset目录下的图片
-@app.route('/dataset/<path:filename>')
-@login_required
-def dataset_files(filename):
-    return send_from_directory('.', os.path.join('dataset', filename))
-
-# 生成品种评分
-def generate_breed_ratings(breed_name):
-    # 不同品种的默认评分
-    breed_ratings = {
-        'Abyssinian': {'friendliness': 5, 'activity_level': 5, 'grooming_needs': 2, 'intelligence': 5},
-        'American Curl': {'friendliness': 5, 'activity_level': 4, 'grooming_needs': 3, 'intelligence': 4},
-        'American Shorthair': {'friendliness': 4, 'activity_level': 3, 'grooming_needs': 2, 'intelligence': 3},
-        'Bengal': {'friendliness': 4, 'activity_level': 5, 'grooming_needs': 2, 'intelligence': 5},
-        'Birman': {'friendliness': 5, 'activity_level': 3, 'grooming_needs': 3, 'intelligence': 4},
-        'Bombay': {'friendliness': 5, 'activity_level': 4, 'grooming_needs': 2, 'intelligence': 4},
-        'British Shorthair': {'friendliness': 4, 'activity_level': 2, 'grooming_needs': 2, 'intelligence': 3},
-        'Egyptian Mau': {'friendliness': 3, 'activity_level': 5, 'grooming_needs': 2, 'intelligence': 5},
-        'Exotic Shorthair': {'friendliness': 5, 'activity_level': 2, 'grooming_needs': 3, 'intelligence': 3},
-        'Himalayan': {'friendliness': 4, 'activity_level': 2, 'grooming_needs': 5, 'intelligence': 3},
-        'Maine Coon': {'friendliness': 5, 'activity_level': 4, 'grooming_needs': 4, 'intelligence': 4},
-        'Manx': {'friendliness': 5, 'activity_level': 4, 'grooming_needs': 3, 'intelligence': 4},
-        'Munchkin': {'friendliness': 5, 'activity_level': 4, 'grooming_needs': 3, 'intelligence': 4},
-        'Norwegian Forest': {'friendliness': 4, 'activity_level': 3, 'grooming_needs': 4, 'intelligence': 4},
-        'Persian': {'friendliness': 4, 'activity_level': 1, 'grooming_needs': 5, 'intelligence': 3},
-        'Ragdoll': {'friendliness': 5, 'activity_level': 2, 'grooming_needs': 3, 'intelligence': 3},
-        'Russian Blue': {'friendliness': 3, 'activity_level': 3, 'grooming_needs': 2, 'intelligence': 4},
-        'Scottish Fold': {'friendliness': 5, 'activity_level': 3, 'grooming_needs': 3, 'intelligence': 4},
-        'Siamese': {'friendliness': 4, 'activity_level': 5, 'grooming_needs': 2, 'intelligence': 5},
-        'Sphynx': {'friendliness': 5, 'activity_level': 5, 'grooming_needs': 3, 'intelligence': 5}
-    }
-    
-    # 返回品种评分，如果没有默认评分则返回一个中等评分
-    return breed_ratings.get(breed_name, {'friendliness': 4, 'activity_level': 3, 'grooming_needs': 3, 'intelligence': 4})
-
-# 获取所有有图片的猫咪品种
-def get_breeds_with_images():
-    # 从训练数据集目录获取品种
-    dataset_dir = os.path.join('dataset', 'train')
-    
-    # 获取所有猫咪品种（从训练目录的文件夹名称）
-    breed_labels = []
-    for item in os.listdir(dataset_dir):
-        if os.path.isdir(os.path.join(dataset_dir, item)):
-            breed_labels.append(item)
-    
-    breeds_with_images = []
-    breed_images = {}
-    
-    for breed_name in breed_labels:
-        # 为每个品种从训练数据集中随机选择一张图片
-        breed_dir = os.path.join(dataset_dir, breed_name)
-        image_files = [f for f in os.listdir(breed_dir) 
-                      if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
-        
-        if image_files:
-            # 处理品种名称映射（Bristish -> British, Regdoll -> Ragdoll）
-            corrected_name = breed_name
-            if breed_name == "Bristish Shorthair":
-                corrected_name = "British Shorthair"
-            elif breed_name == "Regdoll":
-                corrected_name = "Ragdoll"
-            
-            breeds_with_images.append(corrected_name)
-            
-            # 随机选择一张图片而不是使用第一张
-            random_image = random.choice(image_files)
-            breed_images[corrected_name] = {
-                'file': random_image,
-                'path': os.path.join('dataset', 'train', breed_name, random_image)
-            }
-    
-    return breeds_with_images, breed_images
 
 if __name__ == '__main__':
     # Load model when starting
-    load_model()
-    # Warm up model
-    warmup_model()
+    try:
+        load_model()
+        # Warm up model
+        warmup_model()
+    except Exception as e:
+        print(f"Warning: Model loading failed: {e}")
+        
     app.run(debug=True) 
